@@ -16,3 +16,9 @@ var (
 	ClickRadius  = 50.0
 	EdgeSnapping = 20.0
 )
+
+// Image transformation variables
+var (
+	VertScale = 0.1
+	VertShift = 5.0
+)

@@ -2,6 +2,7 @@ package object
 
 import (
 	_ "image/png"
+	"simplegraph_sim/static"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -32,7 +33,7 @@ func (v Vertex) GetPosition() Vector {
 // Draw draws a Vertex based on its position.
 func (v *Vertex) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(0.1, 0.1)
-	op.GeoM.Translate(v.position.x, v.position.y)
+	op.GeoM.Scale(static.VertScale, static.VertScale)
+	op.GeoM.Translate(v.position.x-static.VertShift, v.position.y-static.VertShift)
 	screen.DrawImage(v.imgW, op)
 }

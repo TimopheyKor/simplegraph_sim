@@ -18,21 +18,31 @@ type Simulator struct {
 	graph        object.Graph
 	main, accent color.Color
 	selected     *object.Vertex
+	tempEdge     *object.Edge
 	pointImg     *ebiten.Image
 }
 
 // Update proceeds the game state, and is called every tick.
 func (sim *Simulator) Update() error {
-	sim.CheckClick()
+	sim.RunCursorChecks()
 	return nil
 }
 
 // Draw draws the game screen, and is called every tick.
 func (sim *Simulator) Draw(screen *ebiten.Image) {
 	screen.Fill(sim.main)
-	sim.DrawEdgeDrag(screen)
-	for key := range sim.graph.Data {
-		key.Draw(screen)
+
+	// Draw all the vertecies and edges.
+	for _, edge := range sim.graph.Edges {
+		edge.Draw(screen)
+	}
+	for vert := range sim.graph.Verts {
+		vert.Draw(screen)
+	}
+
+	// Draw the user dragging an edge out from the selected Vertex.
+	if sim.tempEdge != nil {
+		sim.tempEdge.Draw(screen)
 	}
 
 	// Debug draws
@@ -62,6 +72,7 @@ func (sim *Simulator) Layout(outsideWidth, outsideHeight int) (screenWidth, scre
 
 // SetColor takes an int value and sets the main and accent colors of the
 // Simulator object.
+//
 // 0: "Dark Mode"
 // 1: "Light Mode"
 // Default: "Dark Mode"

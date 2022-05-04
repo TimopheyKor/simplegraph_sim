@@ -1,51 +1,72 @@
 package main
 
 import (
-	"fmt"
 	"simplegraph_sim/object"
 	"simplegraph_sim/static"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
+
+// RunCursorCheck gets the current position of the mouse cursor, then
+// checks to see what state the mouse is in. The internal sub-checks for this
+// provide their own responses based on the user's actions.
+func (sim *Simulator) RunCursorChecks() {
+	x, y := ebiten.CursorPosition()
+	cursorPos := object.NewVectorFromInt(x, y)
+	sim.CheckClick(cursorPos)
+	sim.CheckDrag(cursorPos)
+	sim.CheckRelease(cursorPos)
+}
 
 // CheckClick checks if the mouse is pressed, runs checks on what type of click
 // it was and if any existing objects were selected, then calls the appropriate
 // functions for the type of click.
-func (sim *Simulator) CheckClick() {
+func (sim *Simulator) CheckClick(cursorPos object.Vector) {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		x, y := ebiten.CursorPosition()
-		clickPos := object.NewVectorFromInt(x, y)
-		sim.selected = sim.getClickedObject(clickPos)
+		sim.selected = sim.getNearbyVertex(cursorPos, static.ClickRadius)
 		if sim.selected == nil {
-			sim.addVertex(clickPos)
+			sim.addVertex(cursorPos)
 		}
 	}
 }
 
-// TODO: Separate the logic of a new line into a field in the Simulator struct.
-// TODO: Separate the drawing of a line into a function without update logic.
-// DrawEdgeDrag checks to see if the mouse is being dragged from a selected
-// Vertex, and draws a line from that vertex to the cursor position.
-func (sim *Simulator) DrawEdgeDrag(screen *ebiten.Image) {
+// CheckDrag checks to see if the mouse is being dragged from a selected
+// Vertex, and creates a temporary edge from the selected vertex to the cursor.
+func (sim *Simulator) CheckDrag(cursorPos object.Vector) {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		if sim.selected != nil {
-			x, y := ebiten.CursorPosition()
-			cx, cy := float64(x), float64(y)
-			dx, dy := sim.selected.GetPosition().GetXY()
-			fmt.Println(cx, cy, dx, dy)
-			ebitenutil.DrawLine(screen, cx, cy, dx, dy, static.ColorWhite)
+			vert := object.NewVertex(cursorPos, nil)
+			edge := object.NewEdge(sim.selected, &vert)
+			sim.tempEdge = &edge
 		}
 	}
 }
 
-// getClickedObject takes x, y positional float64 values, and checks if there is
-// an existing vertex in the simulator within click range of that position.
-func (sim *Simulator) getClickedObject(click object.Vector) *object.Vertex {
-	for vert := range sim.graph.Data {
+// Check release checks to see if the mouse was released on a frame. If there
+// is a new Edge being drawn and it's within range of another Vertex, adds the
+// Edge to the Graph, and removes the tempEdge. Otherwise, it just removes
+// the tempEdge.
+func (sim *Simulator) CheckRelease(cursorPos object.Vector) {
+	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+		if sim.tempEdge != nil && sim.selected != nil {
+			vert := sim.getNearbyVertex(cursorPos, static.EdgeSnapping)
+			if vert != nil {
+				start, _ := sim.tempEdge.GetVerts()
+				sim.graph.AddEdge(*start, *vert)
+			}
+			sim.tempEdge = nil
+			sim.selected = nil
+		}
+	}
+}
+
+// getNearbyVertex takes a position Vector c and a proximity float64 value p,
+// then returns a Vertex if there is one within the proximity of the position.
+func (sim *Simulator) getNearbyVertex(c object.Vector, p float64) *object.Vertex {
+	for vert := range sim.graph.Verts {
 		vPos := vert.GetPosition()
-		if click.IsInRange(vPos, static.ClickRadius) {
+		if c.IsInRange(vPos, p) {
 			return &vert
 		}
 	}
