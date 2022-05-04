@@ -51,6 +51,8 @@ func (sim *Simulator) Draw(screen *ebiten.Image) {
 		x, y := ebiten.CursorPosition()
 		s := fmt.Sprintf("\nCursor Position: %v, %v\n", x, y)
 		ebitenutil.DebugPrint(screen, s)
+		s = fmt.Sprintf("\n\nSelected: %v, \n", sim.selected)
+		ebitenutil.DebugPrint(screen, s)
 	}
 }
 

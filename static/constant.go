@@ -13,8 +13,9 @@ var (
 
 // Global static proximity variables
 var (
-	ClickRadius  = 50.0
-	EdgeSnapping = 20.0
+	VertPad   = 20.0
+	SnapRad   = 20.0
+	SelectRad = 5.0
 )
 
 // Image transformation variables

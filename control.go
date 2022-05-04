@@ -24,8 +24,11 @@ func (sim *Simulator) RunCursorChecks() {
 // functions for the type of click.
 func (sim *Simulator) CheckClick(cursorPos object.Vector) {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		sim.selected = sim.getNearbyVertex(cursorPos, static.ClickRadius)
-		if sim.selected == nil {
+		// Select a Vertex if you clicked within SelectRad of it
+		sim.selected = sim.getNearbyVertex(cursorPos, static.SelectRad)
+		// Check if there are any other Vertices within VertPad of the click
+		occupied := sim.getNearbyVertex(cursorPos, static.VertPad)
+		if sim.selected == nil && occupied == nil {
 			sim.addVertex(cursorPos)
 		}
 	}
@@ -50,13 +53,12 @@ func (sim *Simulator) CheckDrag(cursorPos object.Vector) {
 func (sim *Simulator) CheckRelease(cursorPos object.Vector) {
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		if sim.tempEdge != nil && sim.selected != nil {
-			vert := sim.getNearbyVertex(cursorPos, static.EdgeSnapping)
+			vert := sim.getNearbyVertex(cursorPos, static.SnapRad)
 			if vert != nil {
 				start, _ := sim.tempEdge.GetVerts()
 				sim.graph.AddEdge(*start, *vert)
 			}
 			sim.tempEdge = nil
-			sim.selected = nil
 		}
 	}
 }
