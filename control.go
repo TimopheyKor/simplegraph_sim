@@ -23,13 +23,21 @@ func (sim *Simulator) RunCursorChecks() {
 // it was and if any existing objects were selected, then calls the appropriate
 // functions for the type of click.
 func (sim *Simulator) CheckClick(cursorPos object.Vector) {
+	// Get a Vertex if it's within SelectRad of the cursor; get nil otherwise.
+	hoveredVert := sim.getNearbyVertex(cursorPos, static.SelectRad)
+	// Select or create a new Vertex on left click.
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		// Select a Vertex if you clicked within SelectRad of it
-		sim.selected = sim.getNearbyVertex(cursorPos, static.SelectRad)
+		sim.selected = hoveredVert
 		// Check if there are any other Vertices within VertPad of the click
 		occupied := sim.getNearbyVertex(cursorPos, static.VertPad)
 		if sim.selected == nil && occupied == nil {
 			sim.addVertex(cursorPos)
+		}
+	}
+	// Delete the vertex that's being hovered over.
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
+		if hoveredVert != nil {
+			sim.graph.RemoveVertex(*hoveredVert)
 		}
 	}
 }

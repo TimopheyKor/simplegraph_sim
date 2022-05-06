@@ -63,3 +63,11 @@ func (g Graph) PrintGraph() {
 	}
 	fmt.Println(result)
 }
+
+// RemoveVertex takes a Vertex object and removes it from the graph.
+func (g *Graph) RemoveVertex(v Vertex) {
+	_, ok := g.Verts[v]
+	if ok {
+		delete(g.Verts, v)
+	}
+}
