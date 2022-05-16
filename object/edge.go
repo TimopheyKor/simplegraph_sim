@@ -8,16 +8,17 @@ import (
 )
 
 type Edge struct {
-	start, finish *Vertex
+	start, finish Vertex
 }
 
 // NewEdge takes two pointers to Vertex objects and returns a new Edge between
 // them.
-func NewEdge(one, two *Vertex) Edge {
+func NewEdge(one, two Vertex) Edge {
 	return Edge{start: one, finish: two}
 }
 
-func (e *Edge) GetVerts() (*Vertex, *Vertex) {
+// GetVerts returns the vertices of an Edge.
+func (e *Edge) GetVerts() (Vertex, Vertex) {
 	return e.start, e.finish
 }
 

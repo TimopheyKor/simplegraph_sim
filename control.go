@@ -48,7 +48,7 @@ func (sim *Simulator) CheckDrag(cursorPos object.Vector) {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		if sim.selected != nil {
 			vert := object.NewVertex(cursorPos, nil)
-			edge := object.NewEdge(sim.selected, &vert)
+			edge := object.NewEdge(*sim.selected, vert)
 			sim.tempEdge = &edge
 		}
 	}
@@ -64,7 +64,7 @@ func (sim *Simulator) CheckRelease(cursorPos object.Vector) {
 			vert := sim.getNearbyVertex(cursorPos, static.SnapRad)
 			if vert != nil {
 				start, _ := sim.tempEdge.GetVerts()
-				sim.graph.AddEdge(*start, *vert)
+				sim.graph.AddEdge(start, *vert)
 			}
 			sim.tempEdge = nil
 		}

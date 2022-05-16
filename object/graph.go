@@ -33,7 +33,7 @@ func (g *Graph) AddEdge(start, finish Vertex) {
 	if one && two {
 		g.Verts[start] = append(g.Verts[start], finish)
 		g.Verts[finish] = append(g.Verts[finish], start)
-		g.Edges = append(g.Edges, NewEdge(&start, &finish))
+		g.Edges = append(g.Edges, NewEdge(start, finish))
 		return
 	}
 	fmt.Printf("Error: vertex %v or %v not in map.", start, finish)
@@ -69,5 +69,23 @@ func (g *Graph) RemoveVertex(v Vertex) {
 	_, ok := g.Verts[v]
 	if ok {
 		delete(g.Verts, v)
+		g.RemoveConnectedEdges(v)
 	}
+}
+
+// TODO: Create better solution to remove single edges.
+// RemoveConnectedEdges loops through the Graph's list of edges and removes
+// any without vertices.
+func (g *Graph) RemoveConnectedEdges(v Vertex) {
+	for i, edge := range g.Edges {
+		if edge.start == v || edge.finish == v {
+			defer g.removeEdgeAtIndex(i)
+		}
+	}
+}
+
+// removeEdgeAtIndex takes an int i and removes the edge at index i of
+// the Graph's slice of edges.
+func (g *Graph) removeEdgeAtIndex(i int) {
+	g.Edges = append(g.Edges[:i], g.Edges[i+1:]...)
 }
